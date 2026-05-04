@@ -1,0 +1,34 @@
+name: "SolarFlow Hyper"
+description: "MQTT Topic Transformer für Zendure Hyper 2000. Erkennt alle Geräte und Batterien automatisch. Kein DTU, kein Token, keine Cloud nötig."
+version: "2.0.0"
+slug: "solarflow-hyper"
+url: "https://github.com/dhaucke/addon-solarflow-hyper/tree/main/solarflow-hyper"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: application
+boot: auto
+options:
+  mqtt_host: "localhost"
+  mqtt_port: 1883
+  mqtt_user: ""
+  mqtt_password: ""
+  product_id: ""
+  device_id: ""
+  ha_discovery: true
+  ha_prefix: "homeassistant"
+  poll_interval: 30
+schema:
+  mqtt_host: str
+  mqtt_port: int
+  mqtt_user: str
+  mqtt_password: str
+  product_id: str
+  device_id: str
+  ha_discovery: bool
+  ha_prefix: str
+  poll_interval: int
