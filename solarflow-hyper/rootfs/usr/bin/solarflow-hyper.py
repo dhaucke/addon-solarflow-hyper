@@ -272,8 +272,8 @@ def handle_report(client, product_id, device_id, payload):
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         log.info(f"Connected to MQTT {MQTT_HOST}:{MQTT_PORT}")
-        client.subscribe(f"{PRODUCT_ID}/{DEVICE_ID}/properties/report")
-        client.subscribe(f"{PRODUCT_ID}/{DEVICE_ID}/telemetry/batteries/#")
+        client.subscribe(f"/{PRODUCT_ID}/{DEVICE_ID}/properties/report")
+        client.subscribe(f"/{PRODUCT_ID}/{DEVICE_ID}/telemetry/batteries/#")
         log.info(f"Subscribed to: {PRODUCT_ID}/{DEVICE_ID}/properties/report")
         log.info(f"Subscribed to: {PRODUCT_ID}/{DEVICE_ID}/telemetry/batteries/#")
         # Send initial getAll to configured device
@@ -306,8 +306,8 @@ def on_message(client, userdata, msg):
         return
 
     # <product>/<device>/properties/report
-    if len(parts) == 4 and parts[2] == "properties" and parts[3] == "report":
-        handle_report(client, parts[0], parts[1], payload)
+    if len(parts) == 5 and parts[3] == "report":
+        handle_report(client, parts[1], parts[2], payload)
 
     # <product>/<device>/telemetry/batteries/<sn>/<field>
     elif len(parts) == 6 and parts[2] == "telemetry" and parts[3] == "batteries":
