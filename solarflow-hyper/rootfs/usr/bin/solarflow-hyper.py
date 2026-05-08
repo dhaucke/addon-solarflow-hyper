@@ -272,10 +272,10 @@ def handle_report(client, product_id, device_id, payload):
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         log.info(f"Connected to MQTT {MQTT_HOST}:{MQTT_PORT}")
-        client.subscribe("+/+/properties/report")
-        client.subscribe("+/+/telemetry/batteries/#")
-        log.info("Subscribed to: +/+/properties/report")
-        log.info("Subscribed to: +/+/telemetry/batteries/#")
+        client.subscribe(f"{PRODUCT_ID}/{DEVICE_ID}/properties/report")
+        client.subscribe(f"{PRODUCT_ID}/{DEVICE_ID}/telemetry/batteries/#")
+        log.info(f"Subscribed to: {PRODUCT_ID}/{DEVICE_ID}/properties/report")
+        log.info(f"Subscribed to: {PRODUCT_ID}/{DEVICE_ID}/telemetry/batteries/#")
         # Send initial getAll to configured device
         if PRODUCT_ID and DEVICE_ID:
             topic = f"iot/{PRODUCT_ID}/{DEVICE_ID}/properties/read"
