@@ -1,6 +1,6 @@
 name: "SolarFlow Hyper"
 description: "MQTT Topic Transformer für Zendure Hyper 2000. Erkennt alle Geräte und Batterien automatisch. Kein DTU, kein Token, keine Cloud nötig."
-version: "2.0.7"
+version: "2.0.8"
 slug: "solarflow-hyper"
 url: "https://github.com/dhaucke/addon-solarflow-hyper/tree/main/solarflow-hyper"
 init: false
