@@ -295,9 +295,11 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 
 def on_message(client, userdata, msg):
-    log.info(f"Message received on topic: {topic}")
     topic = msg.topic
+    log.info(f"Message received on topic: {topic}")
     parts = topic.split("/")
+    # Leading slash means parts[0] is empty, so shift by 1
+    # /gDa3tb/60p60RRA/properties/report -> ['', 'gDa3tb', '60p60RRA', 'properties', 'report']
 
     try:
         payload = json.loads(msg.payload.decode("utf-8"))
@@ -305,13 +307,16 @@ def on_message(client, userdata, msg):
         log.warning(f"JSON parse error on {topic}: {e}")
         return
 
-    # <product>/<device>/properties/report
-    if len(parts) == 5 and parts[3] == "report":
+    # /product/device/properties/report
+    if len(parts) == 5 and parts[3] == "properties" and parts[4] == "report":
         handle_report(client, parts[1], parts[2], payload)
 
-    # <product>/<device>/telemetry/batteries/<sn>/<field>
-    elif len(parts) == 6 and parts[2] == "telemetry" and parts[3] == "batteries":
-        product_id, device_id, sn, field = parts[0], parts[1], parts[4], parts[5]
+    # /product/device/telemetry/batteries/sn/field
+    elif len(parts) == 7 and parts[3] == "telemetry" and parts[4] == "batteries":
+        product_id = parts[1]
+        device_id  = parts[2]
+        sn         = parts[5]
+        field      = parts[6]
         if device_id not in discovered_devices:
             discovered_devices[device_id] = {"product_id": product_id, "batteries": set()}
             if HA_DISCOVERY:
