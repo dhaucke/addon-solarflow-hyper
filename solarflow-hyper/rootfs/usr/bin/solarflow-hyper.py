@@ -151,7 +151,7 @@ def build_select_templates(field, options_map):
 
 
 def publish_ha_discovery_device(client, device_id, product_id):
-    write_topic  = f"/iot/{product_id}/{device_id}/properties/write"
+    write_topic  = f"iot/{product_id}/{device_id}/properties/write"
     status_topic = f"{OUTPUT_PREFIX}/{device_id}/status"
     dev_info = {
         "identifiers": [device_id],
