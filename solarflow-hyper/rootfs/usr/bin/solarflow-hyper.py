@@ -121,6 +121,11 @@ BATTERY_FIELDS = {
     "batcur":   {"name": "Strom",       "type": "sensor", "unit": "A",  "device_class": "current",
                  "value_template": "{{ (value | float / 10) | round(1) }}"},
     "socLevel": {"name": "Ladezustand", "type": "sensor", "unit": "%",  "device_class": "battery"},
+    "state":       {"name": "Status",          "type": "sensor",
+                    "value_template": "{{ 'Standby' if value=='0' else ('Laden' if value=='1' else ('Entladen' if value=='2' else 'Unknown')) }}",
+                    "icon": "mdi:battery-sync-outline"},
+    "power":       {"name": "Leistung",         "type": "sensor", "unit": "W", "device_class": "power", "state_class": "measurement"},
+    "softVersion": {"name": "Firmware",         "type": "sensor", "icon": "mdi:chip", "entity_category": "diagnostic"},
 }
 
 
