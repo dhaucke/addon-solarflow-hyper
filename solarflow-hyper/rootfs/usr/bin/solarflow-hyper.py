@@ -255,7 +255,7 @@ def handle_report(client, product_id, device_id, payload):
             )
 
     # Handle embedded packData
-    for pack in props.get("packData", []):
+    for pack in payload.get("packData", []):
         sn = pack.get("sn")
         if not sn:
             continue
