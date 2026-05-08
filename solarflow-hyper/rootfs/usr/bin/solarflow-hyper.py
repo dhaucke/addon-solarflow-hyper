@@ -269,8 +269,8 @@ def handle_report(client, product_id, device_id, payload):
                 )
 
 
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
+def on_connect(client, userdata, flags, reason_code, properties):
+    if reason_code == 0:
         log.info(f"Connected to MQTT {MQTT_HOST}:{MQTT_PORT}")
         client.subscribe("+/+/properties/report")
         client.subscribe("+/+/telemetry/batteries/#")
@@ -329,7 +329,7 @@ def main():
     log.info(f"  HA Discovery: {HA_DISCOVERY}")
     log.info(f"  Output:       {OUTPUT_PREFIX}/<device_id>/telemetry/")
 
-    client = mqtt.Client(client_id="solarflow-hyper-transformer")
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="solarflow-hyper-transformer")
     if MQTT_USER:
         client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
 
