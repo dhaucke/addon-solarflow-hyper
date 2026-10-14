@@ -1,0 +1,24 @@
+#!/usr/bin/with-contenv bashio
+
+export MQTT_HOST=$(bashio::config 'mqtt_host')
+export MQTT_PORT=$(bashio::config 'mqtt_port')
+export MQTT_USER=$(bashio::config 'mqtt_user')
+export MQTT_PASSWORD=$(bashio::config 'mqtt_password')
+export HA_DISCOVERY=$(bashio::config 'ha_discovery')
+export HA_PREFIX=$(bashio::config 'ha_prefix')
+export POLL_INTERVAL=$(bashio::config 'poll_interval')
+export OUTPUT_PREFIX="solarflow-hub"
+export UID_PREFIX="sfhub"
+
+HUB="$(bashio::config 'hub_product_id')/$(bashio::config 'hub_device_id')"
+ACE="$(bashio::config 'ace_product_id')/$(bashio::config 'ace_device_id')"
+DEVICES=""
+[ -n "$(bashio::config 'hub_device_id')" ] && DEVICES="${HUB}"
+[ -n "$(bashio::config 'ace_device_id')" ] && DEVICES="${DEVICES:+${DEVICES},}${ACE}"
+export DEVICES
+
+bashio::log.info "Starting SolarFlow Hub 2000 + ACE 1500 transformer..."
+bashio::log.info "MQTT: ${MQTT_HOST}:${MQTT_PORT}"
+bashio::log.info "Devices: ${DEVICES:-auto}"
+
+exec python3 /usr/bin/solarflow-hub.py

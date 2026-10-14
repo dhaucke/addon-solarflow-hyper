@@ -1,0 +1,38 @@
+name: "SolarFlow Hub 2000 + ACE 1500"
+description: "MQTT Topic Transformer für Zendure SolarFlow Hub 2000 mit ACE 1500. Erkennt Felder und Batterien automatisch. Kein Token, keine Cloud nötig."
+version: "1.0.0"
+slug: "solarflow-hub"
+url: "https://github.com/dhaucke/addon-solarflow-hyper/tree/main/solarflow-hub"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: application
+boot: auto
+options:
+  mqtt_host: "localhost"
+  mqtt_port: 1883
+  mqtt_user: ""
+  mqtt_password: ""
+  hub_product_id: "A8yh63"
+  hub_device_id: ""
+  ace_product_id: "8bM93H"
+  ace_device_id: ""
+  ha_discovery: true
+  ha_prefix: "homeassistant"
+  poll_interval: 30
+schema:
+  mqtt_host: str
+  mqtt_port: int
+  mqtt_user: str
+  mqtt_password: password
+  hub_product_id: str
+  hub_device_id: str
+  ace_product_id: str
+  ace_device_id: str
+  ha_discovery: bool
+  ha_prefix: str
+  poll_interval: int

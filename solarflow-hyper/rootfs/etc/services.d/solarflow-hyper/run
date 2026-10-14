@@ -9,6 +9,11 @@ export DEVICE_ID=$(bashio::config 'device_id')
 export HA_DISCOVERY=$(bashio::config 'ha_discovery')
 export HA_PREFIX=$(bashio::config 'ha_prefix')
 export POLL_INTERVAL=$(bashio::config 'poll_interval')
+export OUTPUT_PREFIX="solarflow-hyper"
+export UID_PREFIX="hyper"
+if [ -n "${PRODUCT_ID}" ] && [ -n "${DEVICE_ID}" ]; then
+    export DEVICES="${PRODUCT_ID}/${DEVICE_ID}"
+fi
 
 bashio::log.info "Starting SolarFlow Hyper transformer..."
 bashio::log.info "MQTT: ${MQTT_HOST}:${MQTT_PORT}"
