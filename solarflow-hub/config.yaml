@@ -1,8 +1,8 @@
 name: "SolarFlow Hub 2000 + ACE 1500"
 description: "MQTT Topic Transformer für Zendure SolarFlow Hub 2000 mit ACE 1500. Erkennt Felder und Batterien automatisch. Kein Token, keine Cloud nötig."
-version: "1.0.0"
+version: "1.1.0"
 slug: "solarflow-hub"
-url: "https://github.com/dhaucke/addon-solarflow-hyper/tree/main/solarflow-hub"
+url: "https://github.com/dhaucke/solarflow/tree/main/solarflow-hub"
 init: false
 arch:
   - aarch64

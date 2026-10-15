@@ -45,6 +45,8 @@ Entitäten entstehen erst, wenn das Gerät das Feld meldet, typisch:
 - **Hub 2000:** Solar-/Pack-/Home-Leistung, Ladezustand, `outputLimit`, `inverseMaxPower`, SOC-Grenzen, Bypass-Modus, Buzzer, „ACE verbunden“
 - **ACE 1500:** Netzleistung (`gridInputPower`), DC-Ausgang, AC-/DC-Schalter, AC-Modus, `inputLimit` (0–900 W in 100er-Schritten)
 
+Werte, die der ACE vom Hub nur spiegelt (Akkustand, SOC-Grenzen, Restzeiten), zeigt das Addon nur beim Hub an; AC-Modus, `inputLimit` und die Batterien nur beim ACE. Der eigene Solar-Eingang des ACE heißt „ACE Solar Input Power“ bzw. „ACE Solar Power 1/2“.
+
 Topics: `solarflow-hub/<device_id>/telemetry/<feld>`, Status `solarflow-hub/<device_id>/status`.
 
 ## Hinweis Flash-Speicher

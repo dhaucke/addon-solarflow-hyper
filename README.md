@@ -10,7 +10,7 @@ Kein DTU, keine Cloud, kein Token nötig.
 
 ## Installation
 
-1. Repository in HA hinzufügen: `https://github.com/dhaucke/addon-solarflow-hyper`
+1. Repository in HA hinzufügen: `https://github.com/dhaucke/solarflow`
 2. Passendes Addon installieren und konfigurieren
 3. Starten
 

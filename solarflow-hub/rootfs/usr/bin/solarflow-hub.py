@@ -134,8 +134,20 @@ PROPERTY_FIELDS = {
 
 # Per-product deviations from PROPERTY_FIELDS
 PRODUCT_OVERRIDES = {
-    "8bM93H": {"inputLimit": {"max": 900, "step": 100}},
+    "8bM93H": {"inputLimit":      {"max": 900, "step": 100},
+               # ACE has its own solar input, named apart from the hub's
+               "solarInputPower": {"name": "ACE Solar Input Power"},
+               "solarPower1":     {"name": "ACE Solar Power 1"},
+               "solarPower2":     {"name": "ACE Solar Power 2"}},
     "A8yh63": {"inputLimit": {"max": 900, "step": 100}},
+}
+
+# Fields a product mirrors from its partner (Hub 2000 <-> ACE 1500); shown only on the owner
+PRODUCT_HIDDEN = {
+    "8bM93H": {"socSet", "minSoc", "autoModel", "electricLevel", "outputPackPower", "packInputPower",
+               "packNum", "packState", "remainOutTime", "remainInputTime"},
+    # ACE is the AC charger and the packs sit on it, so these belong to it
+    "A8yh63": {"acMode", "inputLimit", "packData"},
 }
 
 BATTERY_FIELDS = {
@@ -279,6 +291,10 @@ def register_device(client, device_id, product_id):
         log.info(f"New device: {device_id} (product: {product_id})")
         if HA_DISCOVERY:
             publish_ha_discovery_status(client, device_id, product_id)
+            # Empty retained config removes entities that earlier versions created
+            for field in PRODUCT_HIDDEN.get(product_id, set()) & PROPERTY_FIELDS.keys():
+                client.publish(f"{HA_PREFIX}/{PROPERTY_FIELDS[field]['type']}/{UID_PREFIX}_{device_id}_{field}/config",
+                               "", retain=True)
 
 
 def publish_field(client, device_id, field, value):
@@ -290,11 +306,19 @@ def publish_field(client, device_id, field, value):
 
 
 def register_battery(client, device_id, sn):
-    if sn not in discovered_devices[device_id]["batteries"]:
-        discovered_devices[device_id]["batteries"].add(sn)
-        log.info(f"New battery: {sn} on {device_id}")
-        if HA_DISCOVERY:
+    """Returns False if this device only mirrors the battery (its partner owns it)."""
+    dev = discovered_devices[device_id]
+    owner = "packData" not in PRODUCT_HIDDEN.get(dev["product_id"], ())
+    if sn not in dev["batteries"]:
+        dev["batteries"].add(sn)
+        log.info(f"New battery: {sn} on {device_id}" + ("" if owner else " (mirrored, ignored)"))
+        if HA_DISCOVERY and owner:
             publish_ha_discovery_battery(client, device_id, sn)
+        elif HA_DISCOVERY:
+            # Remove the duplicate entities earlier versions created for the mirror
+            for field in BATTERY_FIELDS:
+                client.publish(f"{HA_PREFIX}/sensor/{UID_PREFIX}_{device_id}_bat_{sn}_{field}/config", "", retain=True)
+    return owner
 
 
 def handle_report(client, product_id, device_id, payload):
@@ -302,8 +326,9 @@ def handle_report(client, product_id, device_id, payload):
     client.publish(f"{OUTPUT_PREFIX}/{device_id}/status", "online", retain=True)
 
     props = payload.get("properties", {})
+    hidden = PRODUCT_HIDDEN.get(product_id, set())
     for field in PROPERTY_FIELDS:
-        if field in props:
+        if field in props and field not in hidden:
             value = props[field]
             if field in FILTER_FIELDS and value >= FILTER_FIELDS[field]:
                 continue
@@ -313,7 +338,8 @@ def handle_report(client, product_id, device_id, payload):
         sn = pack.get("sn")
         if not sn:
             continue
-        register_battery(client, device_id, sn)
+        if not register_battery(client, device_id, sn):
+            continue
         for field in BATTERY_FIELDS:
             if field in pack:
                 client.publish(
@@ -327,8 +353,9 @@ def handle_energy(client, product_id, device_id, payload):
     if device_id not in discovered_devices:
         return
     props = payload.get("properties", {})
+    hidden = PRODUCT_HIDDEN.get(product_id, set())
     for field in ["outputPower", "chargePower", "mode"]:
-        if field in props:
+        if field in props and field not in hidden:
             publish_field(client, device_id, field, props[field])
 
 
@@ -389,7 +416,8 @@ def on_message(client, userdata, msg):
         sn    = parts[4]
         field = parts[5]
         register_device(client, device_id, product_id)
-        register_battery(client, device_id, sn)
+        if not register_battery(client, device_id, sn):
+            return
         client.publish(
             f"{OUTPUT_PREFIX}/{device_id}/telemetry/batteries/{sn}/{field}",
             msg.payload.decode("utf-8"),

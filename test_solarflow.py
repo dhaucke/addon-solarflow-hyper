@@ -36,10 +36,16 @@ class Msg:
 assert HYPER.read_bytes() == HUB.read_bytes(), "solarflow-hub.py differs from solarflow-hyper.py"
 
 c = FakeClient()
-sf.on_message(c, None, Msg("A8yh63/HUB1/properties/report", {
-    "properties": {"outputLimit": 300, "passMode": 1, "remainOutTime": 59999, "connectedWithAce": 1},
+sf.on_message(c, None, Msg("gDa3tb/HYP0/properties/report", {
     "packData": [{"sn": "CO4FAAAA123456", "socLevel": 80}, {"sn": "CO4FBBBB654321", "socLevel": 70}],
 }))
+sf.on_message(c, None, Msg("A8yh63/HUB1/properties/report", {
+    "properties": {"outputLimit": 300, "passMode": 1, "remainOutTime": 59999, "connectedWithAce": 1},
+    "packData": [{"sn": "CO4FCCCC111111", "socLevel": 80}],
+}))
+# hub only mirrors the packs on the ACE: old entities removed, no telemetry
+assert c.pub["homeassistant/sensor/hyper_HUB1_bat_CO4FCCCC111111_socLevel/config"] == ""
+assert "solarflow-hyper/HUB1/telemetry/batteries/CO4FCCCC111111/socLevel" not in c.pub
 sf.on_message(c, None, Msg("/8bM93H/ACE1/properties/report", {"properties": {"inputLimit": 400, "dcSwitch": 1}}))
 
 # only reported fields get discovered, filtered value neither
@@ -61,8 +67,20 @@ assert (ace["max"], ace["step"]) == (900, 100) and ace["device"]["model"] == "AC
 assert ace["command_topic"] == "iot/8bM93H/ACE1/properties/write"
 assert "homeassistant/switch/hyper_ACE1_dcSwitch/config" in c.pub
 
+# mirrored fields only on their owner; old entities get removed via empty config
+sf.on_message(c, None, Msg("8bM93H/ACE1/properties/report", {"properties": {"electricLevel": 99, "gridInputPower": 5, "solarPower1": 7}}))
+assert json.loads(c.pub["homeassistant/sensor/hyper_ACE1_solarPower1/config"])["name"] == "ACE Solar Power 1"
+assert c.pub["homeassistant/sensor/hyper_ACE1_electricLevel/config"] == ""
+assert "solarflow-hyper/ACE1/telemetry/electricLevel" not in c.pub
+assert "homeassistant/sensor/hyper_ACE1_gridInputPower/config" in c.pub
+sf.on_message(c, None, Msg("8bM93H/ACE1/properties/report", {"packData": [{"sn": "CO4FBBBB654321", "socLevel": 70}]}))
+assert json.loads(c.pub["homeassistant/sensor/hyper_ACE1_bat_CO4FBBBB654321_socLevel/config"])["device"]["via_device"] == "ACE1"
+assert c.pub["solarflow-hyper/ACE1/telemetry/batteries/CO4FBBBB654321/socLevel"] == "70"
+sf.on_message(c, None, Msg("A8yh63/HUB1/properties/report", {"properties": {"acMode": 1}}))
+assert "solarflow-hyper/HUB1/telemetry/acMode" not in c.pub
+
 # battery name from serial, independent of order
-bat = json.loads(c.pub["homeassistant/sensor/hyper_HUB1_bat_CO4FBBBB654321_socLevel/config"])
+bat = json.loads(c.pub["homeassistant/sensor/hyper_HYP0_bat_CO4FBBBB654321_socLevel/config"])
 assert bat["device"]["name"] == "Batterie 654321"
 
 # discovery published once per field, not on every report
